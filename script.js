@@ -63,8 +63,7 @@ function calculate() {
     "<br> Оклад: " +
     result +
     "<br> Переработки: " +
-    result2 +
-    region;
+    result2;
   updateResults(resultsText);
 }
 
