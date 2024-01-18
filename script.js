@@ -16,6 +16,10 @@ function formatNumber(number) {
   return number.toLocaleString("ru-RU");
 }
 
+function toPercentage(number) {
+  return (number * 100).toFixed(0) + "%"; // Форматирует число с двумя знаками после запятой и добавляет '%'
+}
+
 function calculate() {
   var normHours = parseFloat(document.getElementById("normHours").value) || 0;
   var workedHours =
@@ -30,16 +34,108 @@ function calculate() {
   var city = document.getElementById("myInput").value;
   var position = document.getElementById("position").value;
   var simCards = parseFloat(document.getElementById("simCards").value) || 0;
-
+  var ucellCooperation = document.getElementById("ucellCooperation").value;
+  var sfuAvailable = document.getElementById("sfuAvailable").value;
+  var changesCount =
+    parseFloat(document.getElementById("changesCount").value) || 0;
+  var changesPlan =
+    parseFloat(document.getElementById("changesPlan").value) || 0;
+  var testScore = parseFloat(document.getElementById("testScore").value) || 0;
   var region = calculateRegion(city);
   var grade = calculateGrade(city);
   var salaryRate = getSalaryByGrade(grade, position);
+  var vchlGreyd = getVCHLByGrade(ordersCount, region);
+  var limitsGreyd = getLimitsByGrade(limitsCount, region);
+  var limitsPrice = getLimitsPrice(
+    ucellCooperation,
+    sfuAvailable,
+    limitsGreyd,
+    position
+  );
+  var vchlPrice = getVCHLPrice(
+    ucellCooperation,
+    sfuAvailable,
+    vchlGreyd,
+    position
+  );
+  var changePrice = getChangePrice(vchlGreyd);
+  var simPrice = getSimPrice(simCards);
+  var limitCompletion = limitsCount / planCompletion;
+  var changeCompletion = changesCount / changesPlan;
+
+  var penalty = 0;
   var salaryCost = 0; // Инициализация переменной для дополнительных расчетов
   var totalSalary = 0;
+  var limitSalary = 0;
+  var changeSalary = 0;
+  var vchlSalary = 0;
+  var simSalary = simPrice;
+
+  if (testScore < 75) {
+    penalty = 200000;
+  }
+
+  if (limitCompletion > 1.5) {
+    limitSalary =
+      1.1 * 1 +
+      (1.3 - 1.1) * 0.75 +
+      (1.5 - 1.3) * 0.5 +
+      (limitCompletion - 1.5) * 0.25;
+  } else if (limitCompletion >= 1.31) {
+    limitSalary = 1.1 * 1 + (1.3 - 1.1) * 0.75 + (limitCompletion - 1.3) * 0.5;
+  } else if (limitCompletion >= 1.11) {
+    limitSalary = 1.1 * 1 + (limitCompletion - 1.1) * 0.75;
+  } else if (limitCompletion >= 0.91) {
+    limitSalary = limitCompletion * 1;
+  } else if (limitCompletion >= 0.71) {
+    limitSalary = limitCompletion * 0.9;
+  } else if (limitCompletion >= 0.51) {
+    limitSalary = limitCompletion * 0.7;
+  } else if (limitCompletion <= 0.5) {
+    limitSalary = limitCompletion * 0.5;
+  }
+
+  if (changeCompletion > 1.5) {
+    changeSalary =
+      1.1 * 1 +
+      (1.3 - 1.1) * 0.75 +
+      (1.5 - 1.3) * 0.5 +
+      (changeCompletion - 1.5) * 0.25;
+  } else if (changeCompletion >= 1.31) {
+    changeSalary =
+      1.1 * 1 + (1.3 - 1.1) * 0.75 + (changeCompletion - 1.3) * 0.5;
+  } else if (changeCompletion >= 1.11) {
+    changeSalary = 1.1 * 1 + (changeCompletion - 1.1) * 0.75;
+  } else if (changeCompletion >= 0.91) {
+    changeSalary = changeCompletion * 1;
+  } else if (changeCompletion >= 0.71) {
+    changeSalary = changeCompletion * 0.9;
+  } else if (changeCompletion >= 0.51) {
+    changeSalary = changeCompletion * 0.7;
+  } else if (changeCompletion <= 0.5) {
+    changeSalary = changeCompletion * 0.5;
+  }
+
   if (workedHours > normHours) {
     salaryCost = roundUpToNearestThousand(
       (salaryRate / normHours) * (workedHours - normHours) * 2
     );
+  }
+
+  if (vchlScore >= 85) {
+    vchlSalary = (vchlPrice * vchlScore) / 100;
+  } else if (vchlScore >= 73) {
+    vchlSalary = vchlPrice / 2;
+  }
+
+  if (workedHours > 120) {
+    limitsPrice = limitsPrice;
+    vchlPrice = vchlPrice;
+    changePrice = changePrice;
+  } else {
+    limitsPrice = roundUpToNearestThousand((limitsPrice / 120) * workedHours);
+    vchlPrice = roundUpToNearestThousand((vchlPrice / 120) * workedHours);
+    changePrice = roundUpToNearestThousand((changePrice / 120) * workedHours);
   }
 
   if (workedHours > normHours) {
@@ -47,15 +143,23 @@ function calculate() {
     totalSalary = salaryRate;
   } else if (workedHours < normHours) {
     // Если количество отработанных часов меньше нормы
-    totalSalary = Math.round((workedHours * salaryRate) / normHours);
+    totalSalary = roundUpToNearestThousand(
+      (workedHours * salaryRate) / normHours
+    );
   } else {
     // Если количество отработанных часов равно норме
     totalSalary = salaryRate;
   }
 
+  var limitCost = limitsPrice * limitSalary;
+  var changeCost = changePrice * changeSalary;
   // Простой пример расчета
-  var result = roundUpToNearestThousand(totalSalary);
+  var result = formatNumber(totalSalary);
   var result2 = formatNumber(salaryCost);
+  var avans = result / 2;
+  var salary =
+    result / 2 + result2 + simSalary + limitCost + vchlSalary + changeCost;
+  var salaryTotal = salary + avans;
   // Вывод результатов
   var resultsText =
     "Грейд: " +
@@ -63,7 +167,31 @@ function calculate() {
     "<br> Оклад: " +
     result +
     "<br> Переработки: " +
-    result2;
+    result2 +
+    "<br>" +
+    "Бонус по UCELL: " +
+    formatNumber(roundUpToNearestThousand(simSalary)) +
+    "<br>" +
+    "Бонус по лимитам: " +
+    formatNumber(roundUpToNearestThousand(limitCost)) +
+    "<br>" +
+    "Бонус по ВЧЛ: " +
+    formatNumber(roundUpToNearestThousand(vchlSalary)) +
+    "<br>" +
+    "Бонус за смену типа заказа: " +
+    formatNumber(roundUpToNearestThousand(changeCost)) +
+    "<br>" +
+    "Депремация за тестирование: " +
+    penalty +
+    "<br>" +
+    "Всего аванс (25-ое число): " +
+    avans +
+    "<br>" +
+    "Заработная плата 10-ое число: " +
+    salary +
+    "<br>" +
+    "Всего заработная плата сотрдника включая аванс: " +
+    salaryTotal;
   updateResults(resultsText);
 }
 
@@ -295,6 +423,436 @@ function getSalaryByGrade(grade, position) {
     return 2500000;
   } else {
     return 0; // Возвращаем 0, если комбинация грейда и должности не найдена
+  }
+}
+
+function getLimitsByGrade(limitsCount, region) {
+  if (limitsCount >= 400 && region === "Ташкент + ТО") {
+    return "1 грейд";
+  } else if (limitsCount >= 240 && region === "Ташкент + ТО") {
+    return "2 грейд";
+  } else if (limitsCount >= 130 && region === "Ташкент + ТО") {
+    return "3 грейд";
+  } else if (limitsCount < 130 && region === "Ташкент + ТО") {
+    return "4 грейд";
+  } else if (limitsCount >= 500 && region === "Юго-запад") {
+    return "1 грейд";
+  } else if (limitsCount >= 310 && region === "Юго-запад") {
+    return "2 грейд";
+  } else if (limitsCount >= 190 && region === "Юго-запад") {
+    return "3 грейд";
+  } else if (limitsCount < 190 && region === "Юго-запад") {
+    return "4 грейд";
+  } else if (limitsCount >= 320 && region === "Долина") {
+    return "1 грейд";
+  } else if (limitsCount >= 250 && region === "Долина") {
+    return "2 грейд";
+  } else if (limitsCount >= 140 && region === "Долина") {
+    return "3 грейд";
+  } else if (limitsCount < 140 && region === "Долина") {
+    return "4 грейд";
+  } else {
+    return "1";
+  }
+}
+
+function getVCHLByGrade(ordersCount, region) {
+  if (ordersCount >= 10900 && region === "Ташкент + ТО") {
+    return "1 грейд";
+  } else if (ordersCount >= 7600 && region === "Ташкент + ТО") {
+    return "2 грейд";
+  } else if (ordersCount >= 5400 && region === "Ташкент + ТО") {
+    return "3 грейд";
+  } else if (ordersCount < 5400 && region === "Ташкент + ТО") {
+    return "4 грейд";
+  } else if (ordersCount >= 9400 && region === "Юго-запад") {
+    return "1 грейд";
+  } else if (ordersCount >= 7100 && region === "Юго-запад") {
+    return "2 грейд";
+  } else if (ordersCount >= 4600 && region === "Юго-запад") {
+    return "3 грейд";
+  } else if (ordersCount < 4600 && region === "Юго-запад") {
+    return "4 грейд";
+  } else if (ordersCount >= 7700 && region === "Долина") {
+    return "1 грейд";
+  } else if (ordersCount >= 5600 && region === "Долина") {
+    return "2 грейд";
+  } else if (ordersCount >= 3800 && region === "Долина") {
+    return "3 грейд";
+  } else if (ordersCount < 3800 && region === "Долина") {
+    return "4 грейд";
+  } else {
+    return "1";
+  }
+}
+
+function getLimitsPrice(ucellCooperation, sfuAvailable, limitsGreyd, position) {
+  //----Администратор
+  if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 687500;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 625000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 500000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 437500;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 962500;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 875000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 700000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 612500;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 825000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 750000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 600000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    limitsGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 525000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 1237500;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 1125000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 900000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    limitsGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 787500;
+  }
+  //-----Менеджер пункта выдачи
+  else if (
+    ucellCooperation === "Нет" &&
+    limitsGreyd === "1 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 687500;
+  } else if (
+    ucellCooperation === "Нет" &&
+    limitsGreyd === "2 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 625000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    limitsGreyd === "3 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 500000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    limitsGreyd === "4 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 437500;
+  } else if (
+    ucellCooperation === "Да" &&
+    limitsGreyd === "1 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 825000;
+  } else if (
+    ucellCooperation === "Да" &&
+    limitsGreyd === "2 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 750000;
+  } else if (
+    ucellCooperation === "Да" &&
+    limitsGreyd === "3 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 600000;
+  } else if (
+    ucellCooperation === "Да" &&
+    limitsGreyd === "4 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 525000;
+  } else {
+    return 4;
+  }
+}
+
+function getVCHLPrice(ucellCooperation, sfuAvailable, vchlGreyd, position) {
+  //----Администратор
+  if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 1100000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 1000000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 800000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 700000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 825000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 750000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 600000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 525000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 1237500;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 1125000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 900000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Да" &&
+    vchlGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 787500;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "1 грейд" &&
+    position === "Администратор"
+  ) {
+    return 825000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "2 грейд" &&
+    position === "Администратор"
+  ) {
+    return 750000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "3 грейд" &&
+    position === "Администратор"
+  ) {
+    return 600000;
+  } else if (
+    ucellCooperation === "Да" &&
+    sfuAvailable === "Нет" &&
+    vchlGreyd === "4 грейд" &&
+    position === "Администратор"
+  ) {
+    return 525000;
+  }
+  //-----Менеджер пункта выдачи
+  else if (
+    ucellCooperation === "Нет" &&
+    vchlGreyd === "1 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 1100000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    vchlGreyd === "2 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 1000000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    vchlGreyd === "3 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 800000;
+  } else if (
+    ucellCooperation === "Нет" &&
+    vchlGreyd === "4 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 700000;
+  } else if (
+    ucellCooperation === "Да" &&
+    vchlGreyd === "1 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 1237500;
+  } else if (
+    ucellCooperation === "Да" &&
+    vchlGreyd === "2 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 1125000;
+  } else if (
+    ucellCooperation === "Да" &&
+    vchlGreyd === "3 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 900000;
+  } else if (
+    ucellCooperation === "Да" &&
+    vchlGreyd === "4 грейд" &&
+    position === "Менеджер пункта выдачи"
+  ) {
+    return 787500;
+  } else {
+    return 4;
+  }
+}
+
+function getChangePrice(vchlGreyd) {
+  if ((vchlGreyd = "1 грейд")) {
+    return 687500;
+  } else if ((vchlGreyd = "2 грейд")) {
+    return 625000;
+  } else if ((vchlGreyd = "3 грейд")) {
+    return 500000;
+  } else if ((vchlGreyd = "4 грейд")) {
+    return 437500;
+  } else {
+    return 5;
+  }
+}
+
+function getSimPrice(simCards) {
+  if (simCards >= 30) {
+    return 350000;
+  } else if (simCards >= 25) {
+    return 300000;
+  } else if (simCards >= 20) {
+    return 250000;
+  } else if (simCards >= 15) {
+    return 200000;
+  } else if (simCards >= 10) {
+    return 175000;
+  } else if (simCards >= 5) {
+    return 150000;
+  } else {
+    return 0;
   }
 }
 
