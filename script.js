@@ -71,7 +71,9 @@ function calculate() {
   var vchlSalary = 0;
   var simSalary = simPrice;
 
-  if (testScore < 75) {
+  if (testScore >= 75) {
+    penalty = 0;
+  } else if (testScore > 0) {
     penalty = 200000;
   }
 
@@ -156,12 +158,18 @@ function calculate() {
   // Простой пример расчета
   var result = formatNumber(totalSalary);
   var result2 = formatNumber(salaryCost);
-  var avans = result / 2;
+  var avans = totalSalary / 2;
   var salary =
-    result / 2 + result2 + simSalary + limitCost + vchlSalary + changeCost;
+    totalSalary / 2 +
+    salaryCost +
+    simSalary +
+    limitCost +
+    vchlSalary +
+    changeCost -
+    penalty;
   var salaryTotal = salary + avans;
   // Вывод результатов
-  var resultsText =
+  var totalText =
     "Грейд: " +
     grade +
     "<br> Оклад: " +
@@ -182,17 +190,48 @@ function calculate() {
     formatNumber(roundUpToNearestThousand(changeCost)) +
     "<br>" +
     "Депремация за тестирование: " +
-    penalty +
+    formatNumber(roundUpToNearestThousand(penalty)) +
     "<br>" +
     "Всего аванс (25-ое число): " +
-    avans +
+    formatNumber(roundUpToNearestThousand(avans)) +
     "<br>" +
     "Заработная плата 10-ое число: " +
-    salary +
+    formatNumber(roundUpToNearestThousand(salary)) +
     "<br>" +
     "Всего заработная плата сотрдника включая аванс: " +
-    salaryTotal;
+    formatNumber(roundUpToNearestThousand(salaryTotal));
+
+  var resultsText = "Выберите нужный вариант";
+  var resultsText2 = "Заполните поля";
+  var resultsText3 = "Оклад: " + result + "<br> Переработки: " + result2;
+  var resultsText4 =
+    "Грейд по ВЧЛ: " +
+    vchlGreyd +
+    "<br> Бонус по ВЧЛ: " +
+    formatNumber(roundUpToNearestThousand(vchlSalary));
+  var resultsText5 =
+    "Выполнение плана по сменам типа оплаты: " +
+    toPercentage(changeSalary) +
+    "<br>Бонус за смену типа заказа: " +
+    formatNumber(roundUpToNearestThousand(changeCost));
+  var resultsText6 =
+    "Выполнение плана по лимитам: " +
+    toPercentage(limitSalary) +
+    "<br>Бонус по лимитам: " +
+    formatNumber(roundUpToNearestThousand(limitCost));
+  var resultsText7 =
+    "Бонус по UCELL: " +
+    formatNumber(roundUpToNearestThousand(simSalary)) +
+    "<br>Депремация за тестирование: " +
+    formatNumber(roundUpToNearestThousand(penalty));
   updateResults(resultsText);
+  updateResults2(resultsText2);
+  updateResults3(resultsText3);
+  updateResults4(resultsText4);
+  updateResults5(resultsText5);
+  updateResults6(resultsText6);
+  updateResults7(resultsText7);
+  updateTotalText(totalText);
 }
 
 function calculateGrade(city) {
@@ -452,7 +491,7 @@ function getLimitsByGrade(limitsCount, region) {
   } else if (limitsCount < 140 && region === "Долина") {
     return "4 грейд";
   } else {
-    return "1";
+    return "0";
   }
 }
 
@@ -482,7 +521,7 @@ function getVCHLByGrade(ordersCount, region) {
   } else if (ordersCount < 3800 && region === "Долина") {
     return "4 грейд";
   } else {
-    return "1";
+    return "0";
   }
 }
 
@@ -858,4 +897,30 @@ function getSimPrice(simCards) {
 
 function updateResults(text) {
   document.getElementById("results").innerHTML = text;
+}
+
+function updateResults2(text) {
+  document.getElementById("results2").innerHTML = text;
+}
+function updateResults3(text) {
+  document.getElementById("results3").innerHTML = text;
+}
+
+function updateResults4(text) {
+  document.getElementById("results4").innerHTML = text;
+}
+
+function updateResults5(text) {
+  document.getElementById("results5").innerHTML = text;
+}
+
+function updateResults6(text) {
+  document.getElementById("results6").innerHTML = text;
+}
+function updateResults7(text) {
+  document.getElementById("results7").innerHTML = text;
+}
+
+function updateTotalText(text) {
+  document.getElementById("totalText").innerHTML = text;
 }
