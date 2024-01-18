@@ -210,12 +210,16 @@ function calculate() {
     "<br> Бонус по ВЧЛ: " +
     formatNumber(roundUpToNearestThousand(vchlSalary));
   var resultsText5 =
-    "Выполнение плана по сменам типа оплаты: " +
+    "Грейд по сменам типа оплаты: " +
+    vchlGreyd +
+    "<br>Выполнение плана по сменам типа оплаты: " +
     toPercentage(changeSalary) +
     "<br>Бонус за смену типа заказа: " +
     formatNumber(roundUpToNearestThousand(changeCost));
   var resultsText6 =
-    "Выполнение плана по лимитам: " +
+    "Грейд по лимитам: " +
+    limitsGreyd +
+    "<br>Выполнение плана по лимитам: " +
     toPercentage(limitSalary) +
     "<br>Бонус по лимитам: " +
     formatNumber(roundUpToNearestThousand(limitCost));
