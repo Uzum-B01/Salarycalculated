@@ -3,6 +3,22 @@
   <head>
     <title>Калькулятор заработной платы</title>
     <style>
+      .input-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 10px; /* Добавляет промежуток между столбцами и строками */
+      }
+      
+      .input-group {
+        flex-basis: 45%; /* Примерно половина ширины для двух столбцов */
+        border: 2px solid #000000; /* Белая граница */
+        padding: 10px; /* Отступ внутри группы ввода */
+        box-sizing: border-box; /* Убедитесь, что padding и border включены в ширину */
+        margin-bottom: 10px; /* Расстояние между группами ввода */
+      }
+      
+      
       body {
         font-family: Arial, sans-serif;
         background-color: #7000ff; /* Цвет фона */
@@ -29,7 +45,7 @@
       input[type="text"],
       select,
       datalist {
-        width: 10%; /* Установите нужную ширину */
+        width: 25%; /* Установите нужную ширину */
         padding: 5px;
         border: 1px solid #000000;
         border-radius: 5px;
@@ -68,6 +84,7 @@
   </head>
   <img>
     <h2>Калькулятор заработной платы Январь</h2>
+    <div class="input-container">
     <div class="input-group">
       <label for="normHours">Норма по часам:</label>
       <input type="number" id="normHours" />
@@ -81,17 +98,28 @@
       <input type="number" id="ordersCount" />
     </div>
     <div class="input-group">
+      <label for="vchlScore">Балл ВЧЛ:</label>
+      <input type="number" id="vchlScore" />
+    </div>
+    <div class="input-group">
+      <label for="changesCount">Кол-во заказов со сменой типа оплаты</label>
+      <input type="number" id="changesCount" />
+    </div>
+    <div class="input-group">
+      <label for="changesPlan">План по сменам типа оплаты</label>
+      <input type="number" id="changesPlan" />
+    </div>
+    <div class="input-group">
       <label for="limitsCount">Кол-во лимитов:</label>
       <input type="number" id="limitsCount" />
     </div>
     <div class="input-group">
-      <label for="planCompletion">% выполнения плана по лимитам:</label>
+      <label for="planCompletion">План по лимитам</label>
       <input type="number" id="planCompletion" />
     </div>
-    <div class="input-group">
-      <label for="vchlScore">Балл ВЧЛ:</label>
-      <input type="number" id="vchlScore" />
-    </div>
+
+
+
     <div class="input-group">
       <label for="city">Город:</label>
       <input type="text" id="myInput" list="myList" />
@@ -181,7 +209,6 @@
       <datalist id="positionList">
         <option value="Администратор"></option>
         <option value="Менеджер пункта выдачи"></option>
-        <option value="Специалист по финансовым услугам"></option>
       </datalist>
     </div>
 
@@ -189,6 +216,13 @@
       <label for="simCards">Кол-во сим-карт:</label>
       <input type="number" id="simCards" />
     </div>
+
+    <div class="input-group">
+      <label for="testScore">Балл по тестированию:</label>
+      <input type="number" id="testScore" />
+    </div>
+
+
 
     <div class="input-group">
         <label for="ucellCooperation">ПВЗ совместно с UCELL?</label>
@@ -207,7 +241,9 @@
           <option value="Нет"></option>
         </datalist>
       </div>
+    </div>
     <div id="results"></div>
     <script src="script.js"></script>
-  </body>
+  
+</body>
 </html>
