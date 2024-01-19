@@ -202,7 +202,7 @@ function calculate() {
     formatNumber(roundUpToNearestThousand(salaryTotal));
 
   var resultsText = "Выберите нужный вариант";
-  var resultsText2 = "Заполните поля";
+  var resultsText2 = "Ваш Регион: " + region + "<br>Грейд по окладу: " + grade; 
   var resultsText3 = "Оклад: " + result + "<br> Переработки: " + result2;
   var resultsText4 =
     "Грейд по ВЧЛ: " +
