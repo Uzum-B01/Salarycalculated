@@ -198,7 +198,7 @@ function calculate() {
     "Заработная плата 10-ое число: " +
     formatNumber(roundUpToNearestThousand(salary)) +
     "<br>" +
-    "Всего заработная плата сотрдника включая аванс: " +
+    "Всего заработная плата сотрудника включая аванс: " +
     formatNumber(roundUpToNearestThousand(salaryTotal));
 
   var resultsText = "Выберите нужный вариант";
